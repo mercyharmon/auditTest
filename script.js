@@ -20,16 +20,22 @@ $(function () {
                 if(reason_code) {
 
                     $.ajax({
-                        url: 'getNumRows.php',
+                        url: 'getEntries.php',
                         type: 'GET',
-                        success: function (num_rows) {
-                            var id = +num_rows + 1;
+                        success: function (resp) {
+
+                            resp = JSON.parse(resp);
+                            var ids = resp.map(function (d) { return d.RepairID; }),
+                                uniqId = _.uniqueId();
+                            while(ids.indexOf(uniqId) > -1) {
+                                uniqId = _.uniqueId();
+                            }
                             // add to DB
-                            changeDB('center1', 'part1', reason_code, id, 'insert');
+                            changeDB('center1', 'part1', reason_code, uniqId, 'insert');
 
                             main_container.find('#items_list')
-                                .append(_.template($('#add_item').html())({id: id, text: reason_code}));
-                            that.parents('div.modal').modal('hide');
+                                .append(_.template($('#add_item').html())({id: uniqId, text: reason_code}));
+                            $(that).parents('div.modal').modal('hide');
                         }
                     });
                 } else {
